@@ -59,19 +59,13 @@ h2{font:600 1.5em Inter,system-ui,sans-serif;color:var(--fg);text-shadow:none}
 .card:hover{background:rgba(255,255,255,.12);transform:translateY(-3px)}
 .card b{color:var(--fg)}
 input{font-family:inherit;text-transform:none;width:11em;background:rgba(255,255,255,.07);color:var(--fg);border:1px solid var(--line);border-radius:10px;font-size:1.1em}
-.tabs,.langs{display:flex;gap:.4em}
-.langs button,.tab{padding:.3em .9em;font-size:.85em}
-.tab.on,.langs button.on{background:var(--c1);color:#0b1020}
+.langs{display:flex;gap:.4em}
+.langs button{padding:.3em .9em;font-size:.85em}
+.langs button.on{background:var(--c1);color:#0b1020}
 #toasts{position:absolute;top:.8em;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:.4em;pointer-events:none;z-index:5}
 .toast{padding:.35em .9em;border-radius:99px;background:rgba(15,18,28,.72);border:1px solid var(--line);font-size:.85em;backdrop-filter:blur(6px);animation:tf 2.4s ease both}
 .toast:before{content:'';display:inline-block;width:.5em;height:.5em;border-radius:50%;background:var(--d,#fff);margin-right:.5em}
 @keyframes tf{0%{opacity:0;transform:translateY(-6px)}12%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0}}
-#stats{width:min(26em,100%)}
-.stg{display:grid;grid-template-columns:repeat(2,1fr);gap:.5em;width:100%;margin:.5em 0}
-.stg div{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:10px;padding:.5em}
-.stg b{display:block;font-size:1.4em}
-.bars{display:flex;align-items:flex-end;gap:.35em;height:4em;width:100%}
-.bars span{flex:1;background:linear-gradient(var(--c1),var(--c2));border-radius:4px 4px 0 0;min-height:2px;opacity:.85}
 </style>
 </head>
 <body>
@@ -86,10 +80,10 @@ input{font-family:inherit;text-transform:none;width:11em;background:rgba(255,255
   <canvas id="c"></canvas><div id="toasts"></div>
   <div id="menu" class="ov">
     <h1 id="title"></h1>
-    <div class="sm" data-t="Arkanoid × Tetris — survie infinie"></div><div class="tabs"><button class="tab on" data-tab="tHome" data-t="Jeu"></button><button class="tab" data-tab="tStats" data-t="Stats"></button></div><div id="tHome" class="pane">
+    <div class="sm" data-t="Arkanoid × Tetris — survie infinie"></div><div id="tHome" class="pane">
     <div id="lbMenu" class="lb"></div>
     <button id="play" class="cta" data-t="Jouer"></button>
-    <div class="sm" data-t="hint"></div></div><div id="tStats" class="pane hid"><div id="stats"></div></div><div class="langs"><button data-lang="fr">FR</button><button data-lang="en">EN</button><button data-lang="es">ES</button></div>
+    <div class="sm" data-t="hint"></div></div><div class="langs"><button data-lang="fr">FR</button><button data-lang="en">EN</button><button data-lang="es">ES</button></div>
   </div>
   <div id="pause" class="ov hid"><h2 data-t="PAUSE"></h2><button id="resume" data-t="Reprendre"></button></div>
   <div id="lvl" class="ov hid"><h2 data-t="NIVEAU SUPÉRIEUR !"></h2><div class="sm" data-t="Choisis une amélioration"></div><div id="cards" class="cards"></div></div>
@@ -244,7 +238,7 @@ function loseBall(){
   S.fx.wild=S.fx.invert=S.fx.shrink=0;stuckBall()}
 function gameOver(){
   state='over';music(false);sfx('over');if(locked())document.exitPointerLock();
-  const q=S.score>0;recordPlay();
+  const q=S.score>0;
   $('recap').innerHTML=`${tr('Score')} <b style="color:var(--c3)">${S.score}</b><br><span class="sm">${tr('Vague')} ${S.wave} · ${tr('Niveau')} ${S.lvl} · ${S.kills} ${tr('briques')} · ${Math.round(S.t)} s</span>`;
   $('nameBox').classList.toggle('hid',!q);$('nm').value=savedName();if(q)setTimeout(()=>$('nm').focus(),450);
   $('lbOver').innerHTML=lbHTML(-1);refreshBoard().then(()=>{$('lbOver').innerHTML=lbHTML(-1)});
@@ -423,18 +417,18 @@ $('save').onclick=()=>{
   done();postScore({name,score:S.score,wave:S.wave,t:Date.now()}).then(refreshBoard).then(done)};
 $('title').textContent='TETRANOID';
 
-/* ===== Hébergement GitHub Pages : classement partagé et stats =====
+/* ===== Hébergement GitHub Pages : classement partagé =====
    GitHub Pages est statique (aucune écriture côté serveur). Pour un classement commun à tous les joueurs,
    renseigner DB_URL (sans slash final) avec une Firebase Realtime Database (REST, sans SDK).
-   Chemins utilisés : /scores (index 'score') et /plays (index 't'), lecture/écriture publiques.
-   DB_URL vide ou injoignable = classement et stats en local (localStorage), toujours conservés en secours. */
+   Chemin utilisé : /scores (index 'score'), lecture/écriture publiques.
+   DB_URL vide ou injoignable = classement en local (localStorage), toujours conservés en secours. */
 const CFG={DB_URL:''};
 
 /* ===== Langues : FR (clés), EN, ES ===== */
 const L={
  fr:{hint:'Souris ou ← → / Q D · Clic ou Espace : lancer<br>P : pause · M : son'},
- en:{hint:'Mouse or ← → / A D · Click or Space: launch<br>P: pause · M: sound','Arkanoid × Tetris — survie infinie':'Arkanoid × Tetris — endless survival','Jeu':'Game','Stats':'Stats','Jouer':'Play','PAUSE':'PAUSED','Reprendre':'Resume','NIVEAU SUPÉRIEUR !':'LEVEL UP!','Choisis une amélioration':'Choose an upgrade','GAME OVER':'GAME OVER','Ton pseudo pour le classement':'Your nickname for the leaderboard','Rejouer':'Play again','Score':'Score','Record':'Best','Niv':'Lvl','Vague':'Wave','Vitesse':'Speed','Vies':'Lives','VAGUE':'WAVE','Zone élargie !':'Wider arena!','LIGNE':'LINE','LIGNES':'LINES','Balle perdue':'Ball lost','Aucun score':'No score yet','Niveau':'Level','briques':'bricks','FLAMME':'FIRE','BOUCLIER':'SHIELD','RALENTI':'SLOW','RETRECI':'','RÉTRÉCI':'SHRUNK','BALLE FOLLE':'WILD BALL','INVERSION':'INVERTED','DESCENTE !':'RUSH!','FILET':'NET','Raquette XL':'Wide paddle','+18% de largeur':'+18% width','Balle puissante':'Power ball','+1 dégât par impact':'+1 damage per hit','Balle rapide':'Fast ball','+8% de vitesse':'+8% speed','Canons laser':'Laser cannons',`Tir auto (jusqu'à 3 canons)`:'Auto-fire (up to 3 cannons)','Aimant':'Magnet','La balle colle à la raquette':'Ball sticks to the paddle','Multi-balles':'Multi-ball','+2 balles tout de suite':'+2 balls right now','Frein':'Brake','Briques 10% plus lentes':'Bricks 10% slower','Balle explosive':'Explosive ball','Une brique détruite blesse ses voisines':'A destroyed brick damages its neighbours','Foudre':'Lightning','La brique la plus basse est frappée régulièrement':'Strikes the lowest brick regularly','Filet de sécurité':'Safety net','Sauve une balle qui tombe (+1 charge)':'Saves a falling ball (+1 charge)','Chance':'Luck','Plus de bonus qui tombent':'More bonuses drop','Cœur':'Heart','+1 vie (5 maximum)':'+1 life (max 5)','Parties jouées':'Games played','Joueurs':'Players','7 derniers jours':'Last 7 days','Tendance (7 j)':'Trend (7d)','Score moyen':'Average score','Meilleur score':'Best score','Durée moyenne':'Avg. duration','Parties par jour':'Games per day','Stats globales':'Global stats','Stats de cet appareil (aucun serveur configuré)':'This device only (no server configured)','Chargement…':'Loading…','Serveur injoignable':'Server unreachable'},
- es:{hint:'Ratón o ← → / A D · Clic o Espacio: lanzar<br>P: pausa · M: sonido','Arkanoid × Tetris — survie infinie':'Arkanoid × Tetris — supervivencia infinita','Jeu':'Juego','Stats':'Estadísticas','Jouer':'Jugar','PAUSE':'PAUSA','Reprendre':'Reanudar','NIVEAU SUPÉRIEUR !':'¡SUBES DE NIVEL!','Choisis une amélioration':'Elige una mejora','GAME OVER':'FIN DE LA PARTIDA','Ton pseudo pour le classement':'Tu apodo para la clasificación','Rejouer':'Jugar de nuevo','Score':'Puntos','Record':'Récord','Niv':'Nivel','Vague':'Oleada','Vitesse':'Velocidad','Vies':'Vidas','VAGUE':'OLEADA','Zone élargie !':'¡Zona ampliada!','LIGNE':'LÍNEA','LIGNES':'LÍNEAS','Balle perdue':'Bola perdida','Aucun score':'Sin puntuaciones','Niveau':'Nivel','briques':'ladrillos','FLAMME':'FUEGO','BOUCLIER':'ESCUDO','RALENTI':'LENTO','RÉTRÉCI':'ENCOGIDA','BALLE FOLLE':'BOLA LOCA','INVERSION':'INVERTIDO','DESCENTE !':'¡CAÍDA!','FILET':'RED','Raquette XL':'Pala XL','+18% de largeur':'+18% de anchura','Balle puissante':'Bola potente','+1 dégât par impact':'+1 de daño por golpe','Balle rapide':'Bola rápida','+8% de vitesse':'+8% de velocidad','Canons laser':'Cañones láser',`Tir auto (jusqu'à 3 canons)`:'Disparo automático (hasta 3 cañones)','Aimant':'Imán','La balle colle à la raquette':'La bola se pega a la pala','Multi-balles':'Multibola','+2 balles tout de suite':'+2 bolas al instante','Frein':'Freno','Briques 10% plus lentes':'Ladrillos un 10% más lentos','Balle explosive':'Bola explosiva','Une brique détruite blesse ses voisines':'Un ladrillo destruido daña a sus vecinos','Foudre':'Rayo','La brique la plus basse est frappée régulièrement':'Golpea el ladrillo más bajo con regularidad','Filet de sécurité':'Red de seguridad','Sauve une balle qui tombe (+1 charge)':'Salva una bola que cae (+1 carga)','Chance':'Suerte','Plus de bonus qui tombent':'Caen más bonus','Cœur':'Corazón','+1 vie (5 maximum)':'+1 vida (máximo 5)','Parties jouées':'Partidas jugadas','Joueurs':'Jugadores','7 derniers jours':'Últimos 7 días','Tendance (7 j)':'Tendencia (7 d)','Score moyen':'Puntuación media','Meilleur score':'Mejor puntuación','Durée moyenne':'Duración media','Parties par jour':'Partidas por día','Stats globales':'Estadísticas globales','Stats de cet appareil (aucun serveur configuré)':'Solo este dispositivo (sin servidor configurado)','Chargement…':'Cargando…','Serveur injoignable':'Servidor no disponible'}};
+ en:{hint:'Mouse or ← → / A D · Click or Space: launch<br>P: pause · M: sound','Arkanoid × Tetris — survie infinie':'Arkanoid × Tetris — endless survival','Jeu':'Game','Jouer':'Play','PAUSE':'PAUSED','Reprendre':'Resume','NIVEAU SUPÉRIEUR !':'LEVEL UP!','Choisis une amélioration':'Choose an upgrade','GAME OVER':'GAME OVER','Ton pseudo pour le classement':'Your nickname for the leaderboard','Rejouer':'Play again','Score':'Score','Record':'Best','Niv':'Lvl','Vague':'Wave','Vitesse':'Speed','Vies':'Lives','VAGUE':'WAVE','Zone élargie !':'Wider arena!','LIGNE':'LINE','LIGNES':'LINES','Balle perdue':'Ball lost','Aucun score':'No score yet','Niveau':'Level','briques':'bricks','FLAMME':'FIRE','BOUCLIER':'SHIELD','RALENTI':'SLOW','RETRECI':'','RÉTRÉCI':'SHRUNK','BALLE FOLLE':'WILD BALL','INVERSION':'INVERTED','DESCENTE !':'RUSH!','FILET':'NET','Raquette XL':'Wide paddle','+18% de largeur':'+18% width','Balle puissante':'Power ball','+1 dégât par impact':'+1 damage per hit','Balle rapide':'Fast ball','+8% de vitesse':'+8% speed','Canons laser':'Laser cannons',"Tir auto (jusqu'à 3 canons)":'Auto-fire (up to 3 cannons)','Aimant':'Magnet','La balle colle à la raquette':'Ball sticks to the paddle','Multi-balles':'Multi-ball','+2 balles tout de suite':'+2 balls right now','Frein':'Brake','Briques 10% plus lentes':'Bricks 10% slower','Balle explosive':'Explosive ball','Une brique détruite blesse ses voisines':'A destroyed brick damages its neighbours','Foudre':'Lightning','La brique la plus basse est frappée régulièrement':'Strikes the lowest brick regularly','Filet de sécurité':'Safety net','Sauve une balle qui tombe (+1 charge)':'Saves a falling ball (+1 charge)','Chance':'Luck','Plus de bonus qui tombent':'More bonuses drop','Cœur':'Heart','+1 vie (5 maximum)':'+1 life (max 5)'},
+ es:{hint:'Ratón o ← → / A D · Clic o Espacio: lanzar<br>P: pausa · M: sonido','Arkanoid × Tetris — survie infinie':'Arkanoid × Tetris — supervivencia infinita','Jeu':'Juego','Jouer':'Jugar','PAUSE':'PAUSA','Reprendre':'Reanudar','NIVEAU SUPÉRIEUR !':'¡SUBES DE NIVEL!','Choisis une amélioration':'Elige una mejora','GAME OVER':'FIN DE LA PARTIDA','Ton pseudo pour le classement':'Tu apodo para la clasificación','Rejouer':'Jugar de nuevo','Score':'Puntos','Record':'Récord','Niv':'Nivel','Vague':'Oleada','Vitesse':'Velocidad','Vies':'Vidas','VAGUE':'OLEADA','Zone élargie !':'¡Zona ampliada!','LIGNE':'LÍNEA','LIGNES':'LÍNEAS','Balle perdue':'Bola perdida','Aucun score':'Sin puntuaciones','Niveau':'Nivel','briques':'ladrillos','FLAMME':'FUEGO','BOUCLIER':'ESCUDO','RALENTI':'LENTO','RÉTRÉCI':'ENCOGIDA','BALLE FOLLE':'BOLA LOCA','INVERSION':'INVERTIDO','DESCENTE !':'¡CAÍDA!','FILET':'RED','Raquette XL':'Pala XL','+18% de largeur':'+18% de anchura','Balle puissante':'Bola potente','+1 dégât par impact':'+1 de daño por golpe','Balle rapide':'Bola rápida','+8% de vitesse':'+8% de velocidad','Canons laser':'Cañones láser',"Tir auto (jusqu'à 3 canons)":'Disparo automático (hasta 3 cañones)','Aimant':'Imán','La balle colle à la raquette':'La bola se pega a la pala','Multi-balles':'Multibola','+2 balles tout de suite':'+2 bolas al instante','Frein':'Freno','Briques 10% plus lentes':'Ladrillos un 10% más lentos','Balle explosive':'Bola explosiva','Une brique détruite blesse ses voisines':'Un ladrillo destruido daña a sus vecinos','Foudre':'Rayo','La brique la plus basse est frappée régulièrement':'Golpea el ladrillo más bajo con regularidad','Filet de sécurité':'Red de seguridad','Sauve une balle qui tombe (+1 charge)':'Salva una bola que cae (+1 carga)','Chance':'Suerte','Plus de bonus qui tombent':'Caen más bonus','Cœur':'Corazón','+1 vie (5 maximum)':'+1 vida (máximo 5)'}};
 let lang=(()=>{try{const s=localStorage.getItem('tetranoid_lang');if(s&&L[s])return s}catch(e){}const n=(navigator.language||'fr').slice(0,2);return L[n]?n:'en'})();
 const tr=s=>(L[lang]&&L[lang][s])||s;
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
@@ -444,49 +438,19 @@ function applyLang(){
   document.querySelectorAll('[data-t]').forEach(e=>e.innerHTML=tr(e.dataset.t));
   $('nm').placeholder=tr('Jeu')==='Game'?'Nickname':lang==='es'?'Apodo':'Pseudo';
   document.querySelectorAll('[data-lang]').forEach(b=>b.classList.toggle('on',b.dataset.lang===lang));
-  $('lbMenu').innerHTML=lbHTML(-1);
-  if(!$('tStats').classList.contains('hid'))renderStats()}
+  $('lbMenu').innerHTML=lbHTML(-1)}
 
 /* ===== Annonces discrètes en fondu dans la zone de jeu ===== */
 function toast(txt,c){const box=$('toasts'),d=document.createElement('div');d.className='toast';d.textContent=txt;d.style.setProperty('--d',c||'#fff');box.appendChild(d);while(box.children.length>3)box.firstChild.remove();setTimeout(()=>d.remove(),2400)}
 
-/* ===== Serveur (Firebase REST) : classement + parties jouées ===== */
+/* ===== Serveur (Firebase REST) : classement ===== */
 async function api(path,opt){const c=new AbortController(),to=setTimeout(()=>c.abort(),6000);
   try{const r=await fetch(CFG.DB_URL+'/'+path,Object.assign({signal:c.signal},opt));if(!r.ok)throw 0;return await r.json()}catch(e){return null}finally{clearTimeout(to)}}
 async function refreshBoard(){if(!CFG.DB_URL)return;const d=await api('scores.json?orderBy=%22score%22&limitToLast=5');
   if(d)gb=Object.values(d).filter(e=>e&&typeof e.score==='number'&&e.name).sort((a,b)=>b.score-a.score).slice(0,5)}
 function postScore(e){return CFG.DB_URL?api('scores.json',{method:'POST',body:JSON.stringify(e)}):Promise.resolve()}
 
-/* ===== Stats de succès : chaque partie est enregistrée (local + serveur) ===== */
-const pid=(()=>{try{let p=localStorage.getItem('tetranoid_pid');if(!p){p=Math.random().toString(36).slice(2,10);localStorage.setItem('tetranoid_pid',p)}return p}catch(e){return'x'}})();
-function localPlays(){try{return JSON.parse(localStorage.getItem('tetranoid_plays'))||[]}catch(e){return[]}}
-function recordPlay(){const p={t:Date.now(),s:S.score,w:S.wave,d:Math.round(S.t),l:lang,p:pid},a=localPlays();a.push(p);
-  try{localStorage.setItem('tetranoid_plays',JSON.stringify(a.slice(-500)))}catch(e){}
-  if(CFG.DB_URL)api('plays.json',{method:'POST',body:JSON.stringify(p)})}
-async function loadPlays(){
-  if(CFG.DB_URL){const [d,k]=await Promise.all([api('plays.json?orderBy=%22t%22&limitToLast=1000'),api('plays.json?shallow=true')]);
-    if(d){const list=Object.values(d);return{list,total:k?Object.keys(k).length:list.length,remote:true}}}
-  const list=localPlays();return{list,total:list.length,remote:false,err:!!CFG.DB_URL}}
-async function renderStats(){
-  const el=$('stats');el.innerHTML='<div class="sm">'+tr('Chargement…')+'</div>';
-  const {list,total,remote,err}=await loadPlays(),day=864e5,now=Date.now();
-  const w1=list.filter(x=>now-x.t<7*day),w0=list.filter(x=>now-x.t>=7*day&&now-x.t<14*day);
-  const avg=f=>list.length?list.reduce((s,x)=>s+f(x),0)/list.length:0;
-  const trend=w0.length?Math.round((w1.length-w0.length)/w0.length*100):null;
-  const days=[...Array(7)].map((_,i)=>{const a=new Date(now-(6-i)*day);a.setHours(0,0,0,0);const s=a.getTime();return list.filter(x=>x.t>=s&&x.t<s+day).length});
-  const mx=Math.max(1,...days),fmt=n=>Math.round(n).toLocaleString(lang),dur=avg(x=>x.d);
-  const cell=(l,v)=>`<div><span class="sm">${tr(l)}</span><b>${v}</b></div>`;
-  el.innerHTML=`<div class="sm">${tr(remote?'Stats globales':'Stats de cet appareil (aucun serveur configuré)')}${err?' — '+tr('Serveur injoignable'):''}</div><div class="stg">`
-   +cell('Parties jouées',fmt(total))+cell('Joueurs',new Set(list.map(x=>x.p)).size)+cell('7 derniers jours',w1.length)
-   +cell('Tendance (7 j)',trend===null?'—':(trend>0?'+':'')+trend+'%')+cell('Score moyen',fmt(avg(x=>x.s)))
-   +cell('Meilleur score',fmt(Math.max(0,...list.map(x=>x.s))))+cell('Durée moyenne',Math.floor(dur/60)+'m'+String(Math.round(dur%60)).padStart(2,'0'))
-   +`</div><div class="sm">${tr('Parties par jour')}</div><div class="bars">`+days.map(n=>`<span title="${n}" style="height:${n/mx*100}%"></span>`).join('')+'</div>'}
-
-/* ===== Onglets, langues, validation du pseudo ===== */
-document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
-  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
-  $('tHome').classList.toggle('hid',b.dataset.tab!=='tHome');$('tStats').classList.toggle('hid',b.dataset.tab!=='tStats');
-  if(b.dataset.tab==='tStats')renderStats()});
+/* ===== Langues, validation du pseudo ===== */
 document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{lang=b.dataset.lang;try{localStorage.setItem('tetranoid_lang',lang)}catch(e){}applyLang()});
 $('nm').addEventListener('keydown',e=>{if(e.key==='Enter')$('save').click()});
 
